@@ -28,8 +28,8 @@ type Instance struct {
 }
 
 type InstanceService interface {
-	List() ([]Instance, error)
-	GetTopNInstances(n int) ([]Instance, error)
+	List(ctx context.Context) ([]Instance, error)
+	GetTopN(ctx context.Context, n int, instances []Instance) ([]Instance, error)
 }
 
 type instanceService struct {
@@ -37,11 +37,3 @@ type instanceService struct {
 }
 
 var _ InstanceService = instanceService{}
-
-func (s instanceService) List() ([]Instance, error) {
-	return nil, nil
-}
-
-func (s instanceService) GetTopNInstances(n int) ([]Instance, error) {
-	return nil, nil
-}
