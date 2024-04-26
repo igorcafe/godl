@@ -1,6 +1,7 @@
 package youtube
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -15,7 +16,7 @@ func TestFindStreams(t *testing.T) {
 			http:    http.DefaultClient,
 		}
 
-		streams, err := s.FindStreams("YAmLMohrus4")
+		streams, err := s.FindStreams(context.Background(), "YAmLMohrus4")
 		require.NoError(t, err)
 
 		assert.Len(t, streams.AudioStreams, 6)
