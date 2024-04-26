@@ -1,6 +1,7 @@
 package download
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -8,23 +9,27 @@ import (
 )
 
 type Service interface {
-	DownloadStream(url string, destPath string, onProgress func(int64, int64)) error
+	DownloadStream(ctx context.Context, url string, destPath string, onProgress func(int64, int64)) error
 }
 
-type service struct{}
+type service struct {
+	http *http.Client
+}
 
 var _ Service = service{}
 
-func NewService() Service {
-	return service{}
+func NewService(httpClient *http.Client) Service {
+	return service{
+		httpClient,
+	}
 }
 
-func (s service) DownloadStream(url string, destPath string, onProgress func(int64, int64)) error {
+func (s service) DownloadStream(ctx context.Context, url string, destPath string, onProgress func(int64, int64)) error {
 	if onProgress == nil {
 		onProgress = func(i1, i2 int64) {}
 	}
 
-	resp, err := http.Get(url)
+	resp, err := s.http.Get(url)
 	if err != nil {
 		return err
 	}

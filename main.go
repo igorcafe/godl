@@ -37,13 +37,13 @@ func main() {
 	videoStream := streams.VideoStreams[len(streams.VideoStreams)-1]
 	audioStream := streams.AudioStreams[len(streams.AudioStreams)-1]
 
-	dlService := download.NewService()
+	dlSvc := download.NewService(http.DefaultClient)
 
 	errs := make(chan error)
 
 	videoPath := "video." + strings.ToLower(videoStream.Format)
 	go func() {
-		err := dlService.DownloadStream(videoStream.URL, videoPath, func(elapsed, total int64) {
+		err := dlSvc.DownloadStream(context.Background(), videoStream.URL, videoPath, func(elapsed, total int64) {
 			fmt.Printf("video: %d KB / %d KB\n", elapsed/1024, total/1024)
 		})
 		errs <- err
@@ -51,7 +51,7 @@ func main() {
 
 	audioPath := "audio." + strings.ToLower(audioStream.Format)
 	go func() {
-		err := dlService.DownloadStream(videoStream.URL, audioPath, func(elapsed, total int64) {
+		err := dlSvc.DownloadStream(context.Background(), videoStream.URL, audioPath, func(elapsed, total int64) {
 			fmt.Printf("audio: %d KB / %d KB\n", elapsed/1024, total/1024)
 		})
 		errs <- err
