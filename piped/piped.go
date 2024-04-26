@@ -37,3 +37,9 @@ type instanceService struct {
 }
 
 var _ InstanceService = instanceService{}
+
+func NewInstanceService(http *http.Client) InstanceService {
+	return instanceService{
+		http,
+	}
+}

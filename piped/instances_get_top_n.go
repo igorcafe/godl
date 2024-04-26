@@ -18,19 +18,19 @@ func (s instanceService) GetTopN(ctx context.Context, n int, instances []Instanc
 		go func() {
 			req, err := http.NewRequestWithContext(ctx, "GET", inst.URL+"/streams/mtaQroi75M0", nil)
 			if err != nil {
-				log.Print(err)
+				log.Print("failed to interact with instance: ", err)
 				return
 			}
 
 			resp, err := s.http.Do(req)
 			if err != nil {
-				log.Print(err)
+				log.Print("failed to interact with instance: ", err)
 				return
 			}
 			defer resp.Body.Close()
 
 			if resp.StatusCode != http.StatusOK {
-				log.Print(resp.StatusCode)
+				log.Print("failed to interact with instance: ", resp.StatusCode)
 				return
 			}
 
