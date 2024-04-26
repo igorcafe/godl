@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/igoracmelo/godl/download"
-	"github.com/igoracmelo/godl/youtube"
+	"github.com/igoracmelo/godl/piped"
 )
 
 func main() {
@@ -27,9 +27,9 @@ func main() {
 		panic("no videoID")
 	}
 
-	ytService := youtube.NewService("https://api.piped.projectsegfau.lt", http.DefaultClient)
+	pipedSvc := piped.NewService("https://api.piped.projectsegfau.lt", http.DefaultClient)
 
-	streams, err := ytService.FindStreams(context.Background(), videoID)
+	streams, err := pipedSvc.FindStreams(context.Background(), videoID)
 	if err != nil {
 		panic(err)
 	}
