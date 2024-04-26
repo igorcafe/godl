@@ -12,6 +12,7 @@ func (s instanceService) GetTopN(ctx context.Context, n int, instances []Instanc
 	}
 
 	ch := make(chan Instance, n)
+	ctx, cancel := context.WithCancel(ctx)
 
 	for _, inst := range instances {
 		inst := inst
@@ -42,6 +43,7 @@ func (s instanceService) GetTopN(ctx context.Context, n int, instances []Instanc
 	for i := 0; i < n; i++ {
 		result[i] = <-ch
 	}
+	cancel()
 
 	return result, nil
 }

@@ -29,7 +29,12 @@ func (s service) DownloadStream(ctx context.Context, url string, destPath string
 		onProgress = func(i1, i2 int64) {}
 	}
 
-	resp, err := s.http.Get(url)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := s.http.Do(req)
 	if err != nil {
 		return err
 	}
@@ -40,7 +45,10 @@ func (s service) DownloadStream(ctx context.Context, url string, destPath string
 	if err != nil {
 		return err
 	}
-	defer tempFile.Close()
+	defer func() {
+		_ = tempFile.Close()
+		_ = os.Remove(tempPath)
+	}()
 
 	elapsed := int64(0)
 	total := resp.ContentLength
@@ -48,6 +56,12 @@ func (s service) DownloadStream(ctx context.Context, url string, destPath string
 	// Can't use io.Copy since I want to call onProgress
 	buf := make([]byte, 132*1024)
 	for {
+		select {
+		default:
+		case <-ctx.Done():
+			return context.Canceled
+		}
+
 		nr, rerr := resp.Body.Read(buf)
 		nw, werr := tempFile.Write(buf[:nr])
 

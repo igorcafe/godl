@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	urlpkg "net/url"
+	"os"
+	"os/signal"
 
 	"github.com/igoracmelo/godl/download"
 	"github.com/igoracmelo/godl/piped"
@@ -27,20 +29,23 @@ func main() {
 		log.Fatal("no videoID")
 	}
 
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
 	instanceSvc := piped.NewInstanceService(http.DefaultClient)
-	instances, err := instanceSvc.List(context.Background())
+	instances, err := instanceSvc.List(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	top, err := instanceSvc.GetTopN(context.Background(), 1, instances)
+	top, err := instanceSvc.GetTopN(ctx, 1, instances)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	pipedSvc := piped.NewService(top[0].URL, http.DefaultClient)
 
-	streams, err := pipedSvc.FindStreams(context.Background(), videoID)
+	streams, err := pipedSvc.FindStreams(ctx, videoID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,7 +59,7 @@ func main() {
 
 	videoPath := "video.mp4"
 	go func() {
-		err := dlSvc.DownloadStream(context.Background(), videoStream.URL, videoPath, func(elapsed, total int64) {
+		err := dlSvc.DownloadStream(ctx, videoStream.URL, videoPath, func(elapsed, total int64) {
 			fmt.Printf("video: %d KB / %d KB\n", elapsed/1024, total/1024)
 		})
 		errs <- err
@@ -62,7 +67,7 @@ func main() {
 
 	audioPath := "audio.mp3"
 	go func() {
-		err := dlSvc.DownloadStream(context.Background(), audioStream.URL, audioPath, func(elapsed, total int64) {
+		err := dlSvc.DownloadStream(ctx, audioStream.URL, audioPath, func(elapsed, total int64) {
 			fmt.Printf("audio: %d KB / %d KB\n", elapsed/1024, total/1024)
 		})
 		errs <- err
@@ -70,11 +75,11 @@ func main() {
 
 	err = <-errs
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	err = <-errs
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
