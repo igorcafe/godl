@@ -42,6 +42,11 @@ func (s instanceService) GetTopN(ctx context.Context, n int, instances []Instanc
 				return
 			}
 
+			if resp.Header.Get("Content-Type") != "application/json" {
+				log.Print("unexpected content type: ", resp.Header.Get("Content-Type"))
+				return
+			}
+
 			ch <- inst
 		}()
 	}
