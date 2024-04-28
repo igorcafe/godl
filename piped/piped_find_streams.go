@@ -29,6 +29,8 @@ type AudioStream struct {
 	Format        string
 	ContentLength int
 	Quality       string
+	Codec         string
+	MIMEType      string
 }
 
 type StreamsResponse struct {
@@ -44,7 +46,6 @@ func (s service) FindStreams(ctx context.Context, videoID string) (StreamsRespon
 	//	  -H 'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
 
 	url := s.baseURL + "/streams/" + videoID
-	log.Print(url)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
