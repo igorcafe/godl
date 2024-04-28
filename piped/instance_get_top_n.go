@@ -2,6 +2,7 @@ package piped
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 )
@@ -18,12 +19,18 @@ func (s instanceService) GetTopN(ctx context.Context, n int, instances []Instanc
 		inst := inst
 		go func() {
 			req, err := http.NewRequestWithContext(ctx, "GET", inst.URL+"/streams/mtaQroi75M0", nil)
+			if errors.Is(err, context.Canceled) {
+				return
+			}
 			if err != nil {
 				log.Print("failed to interact with instance: ", err)
 				return
 			}
 
 			resp, err := s.http.Do(req)
+			if errors.Is(err, context.Canceled) {
+				return
+			}
 			if err != nil {
 				log.Print("failed to interact with instance: ", err)
 				return
