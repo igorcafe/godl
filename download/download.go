@@ -2,7 +2,6 @@ package download
 
 import (
 	"context"
-	"errors"
 	"io"
 	"net/http"
 	"os"
@@ -63,20 +62,27 @@ func (s service) DownloadStream(ctx context.Context, url string, destPath string
 		}
 
 		nr, rerr := resp.Body.Read(buf)
-		nw, werr := tempFile.Write(buf[:nr])
-
-		if errors.Is(rerr, io.EOF) {
+		if nr == 0 && rerr == io.EOF {
 			break
+		}
+
+		nw, werr := tempFile.Write(buf[:nr])
+		if werr != nil {
+			return werr
 		}
 
 		elapsed += int64(nw)
 		onProgress(elapsed, total)
 
+		if nw != nr {
+			return io.ErrShortWrite
+		}
+
+		if rerr == io.EOF {
+			break
+		}
 		if rerr != nil {
 			return rerr
-		}
-		if werr != nil {
-			return werr
 		}
 	}
 
