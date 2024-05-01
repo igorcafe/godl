@@ -10,6 +10,7 @@ import (
 )
 
 func Test(t *testing.T) {
+	t.Parallel()
 	s := instanceService{
 		http.DefaultClient,
 	}
