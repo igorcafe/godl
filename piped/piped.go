@@ -2,6 +2,7 @@ package piped
 
 import (
 	"context"
+	"log"
 	"net/http"
 )
 
@@ -10,14 +11,16 @@ type Service interface {
 }
 
 type service struct {
+	log     *log.Logger
 	baseURL string
 	http    *http.Client
 }
 
 var _ Service = service{}
 
-func NewService(baseURL string, httpClient *http.Client) Service {
+func NewService(logger *log.Logger, baseURL string, httpClient *http.Client) Service {
 	return service{
+		logger,
 		baseURL,
 		httpClient,
 	}

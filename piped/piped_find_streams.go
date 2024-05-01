@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -70,8 +69,8 @@ func (s service) FindStreams(ctx context.Context, videoID string) (StreamsRespon
 
 	err = json.Unmarshal(b, &streams)
 	if err != nil {
-		log.Print(resp.Status)
-		log.Print(string(b))
+		s.log.Print(resp.Status)
+		s.log.Print(string(b))
 		return streams, err
 	}
 

@@ -68,7 +68,7 @@ func main() {
 	fmt.Println("using instance", top[0].URL)
 	fmt.Println()
 
-	pipedSvc := piped.NewService(top[0].URL, http.DefaultClient)
+	pipedSvc := piped.NewService(stderr, top[0].URL, http.DefaultClient)
 
 	video, err := pipedSvc.FindStreams(ctx, videoID)
 	if err != nil {
@@ -89,7 +89,6 @@ func main() {
 			if s.FPS != 0 {
 				fps = strconv.Itoa(s.FPS)
 			}
-
 			fmt.Printf("%d) %s - %s fps - %.1f MB - %s\n", i+1, s.Quality, fps, float64(s.ContentLength)/1024/1024, s.Codec)
 		}
 		fmt.Print("Choose video option (0 to skip): ")

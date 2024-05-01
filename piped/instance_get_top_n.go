@@ -3,7 +3,8 @@ package piped
 import (
 	"context"
 	"errors"
-	"net/http"
+	"io"
+	"log"
 )
 
 func (s instanceService) GetTopN(ctx context.Context, n int, instances []Instance) ([]Instance, error) {
@@ -16,33 +17,14 @@ func (s instanceService) GetTopN(ctx context.Context, n int, instances []Instanc
 
 	for _, inst := range instances {
 		inst := inst
+		piped := NewService(log.New(io.Discard, "", 0), inst.URL, s.http)
 		go func() {
-			req, err := http.NewRequestWithContext(ctx, "GET", inst.URL+"/streams/mtaQroi75M0", nil)
+			_, err := piped.FindStreams(ctx, "mtaQroi75M0")
 			if errors.Is(err, context.Canceled) {
 				return
 			}
 			if err != nil {
 				// log.Print("failed to interact with instance: ", err)
-				return
-			}
-
-			resp, err := s.http.Do(req)
-			if errors.Is(err, context.Canceled) {
-				return
-			}
-			if err != nil {
-				// log.Print("failed to interact with instance: ", err)
-				return
-			}
-			defer resp.Body.Close()
-
-			if resp.StatusCode != http.StatusOK {
-				// log.Print("failed to interact with instance: ", resp.StatusCode)
-				return
-			}
-
-			if resp.Header.Get("Content-Type") != "application/json" {
-				// log.Print("unexpected content type: ", resp.Header.Get("Content-Type"))
 				return
 			}
 
