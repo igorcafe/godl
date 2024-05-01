@@ -129,7 +129,7 @@ func main() {
 	if videoOption != 0 {
 		downloadCount++
 		go func() {
-			videoPath := "video.mp4"
+			videoPath := video.Title + ".mp4"
 			videoStream := video.VideoStreams[videoOption-1]
 			now := time.Now()
 			stderr.Print("video: download started")
