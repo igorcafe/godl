@@ -3,7 +3,6 @@ package piped
 import (
 	"context"
 	"errors"
-	"log"
 	"net/http"
 )
 
@@ -23,7 +22,7 @@ func (s instanceService) GetTopN(ctx context.Context, n int, instances []Instanc
 				return
 			}
 			if err != nil {
-				log.Print("failed to interact with instance: ", err)
+				// log.Print("failed to interact with instance: ", err)
 				return
 			}
 
@@ -32,18 +31,18 @@ func (s instanceService) GetTopN(ctx context.Context, n int, instances []Instanc
 				return
 			}
 			if err != nil {
-				log.Print("failed to interact with instance: ", err)
+				// log.Print("failed to interact with instance: ", err)
 				return
 			}
 			defer resp.Body.Close()
 
 			if resp.StatusCode != http.StatusOK {
-				log.Print("failed to interact with instance: ", resp.StatusCode)
+				// log.Print("failed to interact with instance: ", resp.StatusCode)
 				return
 			}
 
 			if resp.Header.Get("Content-Type") != "application/json" {
-				log.Print("unexpected content type: ", resp.Header.Get("Content-Type"))
+				// log.Print("unexpected content type: ", resp.Header.Get("Content-Type"))
 				return
 			}
 

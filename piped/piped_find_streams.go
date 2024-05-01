@@ -21,6 +21,7 @@ type VideoStream struct {
 	ContentLength int
 	Quality       string
 	FPS           int
+	Codec         string
 	VideoOnly     bool
 }
 
@@ -34,6 +35,7 @@ type AudioStream struct {
 }
 
 type StreamsResponse struct {
+	Title        string
 	VideoStreams []VideoStream
 	AudioStreams []AudioStream
 }
