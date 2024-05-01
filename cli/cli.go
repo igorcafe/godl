@@ -147,7 +147,7 @@ func main() {
 		downloadCount++
 		go func() {
 			audioPath := video.Title + ".mp3"
-			audioStream := video.AudioStreams[len(video.AudioStreams)-1]
+			audioStream := video.AudioStreams[audioOption-1]
 			now := time.Now()
 			stderr.Print("audio: download started")
 			err := dlSvc.DownloadStream(ctx, audioStream.URL, audioPath, func(elapsed, total int64) {
