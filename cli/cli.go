@@ -14,6 +14,7 @@ import (
 
 	"github.com/igoracmelo/godl/bufioctx"
 	"github.com/igoracmelo/godl/download"
+	"github.com/igoracmelo/godl/media"
 	"github.com/igoracmelo/godl/piped"
 )
 
@@ -47,7 +48,6 @@ func main() {
 
 	videoID := url.Query().Get("v")
 	if videoID == "" {
-		stderr.Panic("no videoID")
 		log.Panicf("url doesn't contain video parameter (?v=): %s", flag.Arg(0))
 	}
 
@@ -121,53 +121,27 @@ func main() {
 		fmt.Println()
 	}
 
-	dlSvc := download.NewService(http.DefaultClient)
-	errs := make(chan error)
-	downloadCount := 0
-
+	var videoStream *piped.VideoStream
 	if videoOption != 0 {
-		downloadCount++
-		go func() {
-			videoPath := video.Title + ".mp4"
-			videoStream := video.VideoStreams[videoOption-1]
-			now := time.Now()
-			stderr.Print("video: download started")
-			err := dlSvc.DownloadStream(ctx, videoStream.URL, videoPath, func(elapsed, total int64) {
-				stderr.Printf("video: %d KB / %d KB\n", elapsed/1024, total/1024)
-			})
-			if err == nil {
-				stderr.Printf("video: finished downloading in %.1f seconds", time.Since(now).Seconds())
-			}
-			errs <- err
-		}()
+		videoStream = &video.VideoStreams[videoOption-1]
 	}
 
+	var audioStream *piped.AudioStream
 	if audioOption != 0 {
-		downloadCount++
-		go func() {
-			audioPath := video.Title + ".mp3"
-			audioStream := video.AudioStreams[audioOption-1]
-			now := time.Now()
-			stderr.Print("audio: download started")
-			err := dlSvc.DownloadStream(ctx, audioStream.URL, audioPath, func(elapsed, total int64) {
-				stderr.Printf("audio: %d KB / %d KB\n", elapsed/1024, total/1024)
-			})
-			if err == nil {
-				fmt.Printf("audio: finished downloading in %.1f seconds\n", time.Since(now).Seconds())
-			}
-			errs <- err
-		}()
+		audioStream = &video.AudioStreams[audioOption-1]
 	}
 
-	for i := 0; i < downloadCount; i++ {
-		err = <-errs
-		if err != nil {
-			stderr.Print(err)
-		}
+	mediaSvc := media.NewFFmpegService()
+	downloadSvc := download.NewService(http.DefaultClient)
+	err = downloadSvc.DownloadFromPiped(ctx, download.DownloadFromPipedParams{
+		Title:        video.Title,
+		AudioStream:  audioStream,
+		VideoStream:  videoStream,
+		MediaService: mediaSvc,
+	})
+	if err != nil {
+		stderr.Panic(err)
 	}
 
-	if downloadCount == 0 {
-		fmt.Println("nothing to download")
-		os.Exit(1)
-	}
+	stderr.Print("finished")
 }
