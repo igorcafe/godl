@@ -41,6 +41,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	mediaSvc := media.NewFFmpegService()
+	downloadSvc := download.NewService(http.DefaultClient)
+	instanceSvc := piped.NewInstanceService(http.DefaultClient)
+
 	url, err := urlpkg.Parse(flag.Arg(0))
 	if err != nil {
 		log.Panicf("invalid url: %v", err)
@@ -54,7 +58,6 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	instanceSvc := piped.NewInstanceService(http.DefaultClient)
 	instances, err := instanceSvc.List(ctx)
 	if err != nil {
 		stderr.Panic(err)
@@ -131,8 +134,6 @@ func main() {
 		audioStream = &video.AudioStreams[audioOption-1]
 	}
 
-	mediaSvc := media.NewFFmpegService()
-	downloadSvc := download.NewService(http.DefaultClient)
 	err = downloadSvc.DownloadFromPiped(ctx, download.DownloadFromPipedParams{
 		Title:        video.Title,
 		AudioStream:  audioStream,
