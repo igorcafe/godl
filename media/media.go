@@ -17,6 +17,7 @@ func NewFFmpegService() Service {
 
 func (s service) JoinTracks(ctx context.Context, dest string, sources ...string) error {
 	args := []string{
+		"-y",
 		"-hide_banner",
 		"-loglevel",
 		"error",
